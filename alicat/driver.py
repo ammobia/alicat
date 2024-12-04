@@ -261,6 +261,26 @@ class FlowMeter:
         command = f'{self.unit}T'
         await self._write_and_read(command)
 
+    async def set_stp(self, stp_or_ntp: str, p_or_t: str, value: float) -> float:
+        """Sets the STP/NTP pressure or temperature."""
+        command = f'{self.unit}DCFR{p_or_t} {stp_or_ntp} 0 {value}'
+        line = await self._write_and_read(command)
+        if not line:
+            raise OSError("Could not set stp/ntp.")
+        try:
+            current = float(line.split()[1])
+        except IndexError:
+            current = None
+        return current
+
+    async def set_stp_ntp_pressure(self, stp_or_ntp: str, pressure: float) -> None:
+        """Sets the STP/NTP pressure. stp_or_ntp should be 'S' or 'N'"""
+        self.set_stp(stp_or_ntp, 'P', pressure)
+
+    async def set_stp_ntp_temperature(self, stp_or_ntp: str, temperature: float) -> None:
+        """Sets the STP/NTP temperature. stp_or_ntp should be 'S' or 'N'"""
+        self.set_stp(stp_or_ntp, 'T', temperature)
+
     async def get_firmware(self) -> str:
         """Get the device firmware version."""
         if self.firmware is None:
