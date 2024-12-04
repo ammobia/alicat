@@ -260,6 +260,18 @@ class FlowMeter:
         """Reset the totalizer."""
         command = f'{self.unit}T'
         await self._write_and_read(command)
+        
+    async def get_stp(self, stp_or_ntp: str, p_or_t: str) -> float:
+        """Sets the STP/NTP pressure or temperature."""
+        command = f'{self.unit} DCFR{p_or_t} {stp_or_ntp}'
+        line = await self._write_and_read(command)
+        if not line:
+            raise OSError("Could not get stp/ntp.")
+        try:
+            current = float(line.split()[1])
+        except IndexError:
+            current = None
+        return current
 
     async def set_stp(self, stp_or_ntp: str, p_or_t: str, value: float) -> float:
         """Sets the STP/NTP pressure or temperature."""
