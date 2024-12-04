@@ -96,7 +96,7 @@ class FlowMeter:
         """
         if not self.open:
             raise OSError(f"The FlowMeter with unit ID {self.unit} and "
-                           "port {self.hw.address} is not open")
+                            f"port {self.hw.address} is not open")
 
     async def _write_and_read(self, command: str) -> str | None:
         """Wrap the communicator request, to call _test_controller_open() before any request."""
@@ -263,7 +263,7 @@ class FlowMeter:
 
     async def set_stp(self, stp_or_ntp: str, p_or_t: str, value: float) -> float:
         """Sets the STP/NTP pressure or temperature."""
-        command = f'{self.unit}DCFR{p_or_t} {stp_or_ntp} 0 {value}'
+        command = f'{self.unit} DCFR{p_or_t} {stp_or_ntp} 0 {value}'
         line = await self._write_and_read(command)
         if not line:
             raise OSError("Could not set stp/ntp.")
@@ -273,13 +273,13 @@ class FlowMeter:
             current = None
         return current
 
-    async def set_stp_ntp_pressure(self, stp_or_ntp: str, pressure: float) -> None:
+    async def set_stp_ntp_pressure(self, stp_or_ntp: str, pressure: float) -> float:
         """Sets the STP/NTP pressure. stp_or_ntp should be 'S' or 'N'"""
-        self.set_stp(stp_or_ntp, 'P', pressure)
+        return await self.set_stp(stp_or_ntp, 'P', pressure)
 
-    async def set_stp_ntp_temperature(self, stp_or_ntp: str, temperature: float) -> None:
+    async def set_stp_ntp_temperature(self, stp_or_ntp: str, temperature: float) -> float:
         """Sets the STP/NTP temperature. stp_or_ntp should be 'S' or 'N'"""
-        self.set_stp(stp_or_ntp, 'T', temperature)
+        return await self.set_stp(stp_or_ntp, 'T', temperature)
 
     async def get_firmware(self) -> str:
         """Get the device firmware version."""
